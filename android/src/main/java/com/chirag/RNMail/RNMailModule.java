@@ -6,6 +6,8 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.text.Html;
 
+import androidx.core.content.FileProvider;
+
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -54,8 +56,9 @@ public class RNMailModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void mail(ReadableMap options, Callback callback) {
-    Intent i = new Intent(Intent.ACTION_SENDTO);
-    i.setData(Uri.parse("mailto:"));
+    Intent i = new Intent(Intent.ACTION_SEND_MULTIPLE);
+    Intent selectorIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
+    i.setSelector(selectorIntent);
 
     if (options.hasKey("subject") && !options.isNull("subject")) {
       i.putExtra(Intent.EXTRA_SUBJECT, options.getString("subject"));
@@ -87,6 +90,7 @@ public class RNMailModule extends ReactContextBaseJavaModule {
 
     if (options.hasKey("attachments") && !options.isNull("attachments")) {
        ReadableArray r = options.getArray("attachments");
+       String provider = reactContext.getApplicationContext().getPackageName() + ".provider";
        int length = r.size();
        ArrayList<Uri> uris = new ArrayList<Uri>();
        for (int keyIndex = 0; keyIndex < length; keyIndex++) {
@@ -94,10 +98,11 @@ public class RNMailModule extends ReactContextBaseJavaModule {
          if (clip.hasKey("path") && !clip.isNull("path")){
            String path = clip.getString("path");
            File file = new File(path);
-           Uri u = Uri.fromFile(file);
-           uris.add(u);
+           Uri uri = FileProvider.getUriForFile(reactContext, provider, file);
+           uris.add(uri);
          }
        }
+       i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
        i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
      }
 
