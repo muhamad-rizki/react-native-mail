@@ -68,6 +68,7 @@ public class RNMailModule extends ReactContextBaseJavaModule {
       String body = options.getString("body");
       if (options.hasKey("isHTML") && options.getBoolean("isHTML")) {
         i.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(body));
+        i.putExtra(Intent.EXTRA_HTML_TEXT, body);
       } else {
         i.putExtra(Intent.EXTRA_TEXT, body);
       }
