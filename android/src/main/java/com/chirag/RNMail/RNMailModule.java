@@ -97,8 +97,13 @@ public class RNMailModule extends ReactContextBaseJavaModule {
          ReadableMap clip = r.getMap(keyIndex);
          if (clip.hasKey("path") && !clip.isNull("path")){
            String path = clip.getString("path");
-           File file = new File(path);
-           Uri uri = FileProvider.getUriForFile(reactContext, provider, file);
+           Uri uri = Uri.parse(path);
+           try {
+             File file = new File(path);
+             uri = FileProvider.getUriForFile(reactContext, provider, file);
+           } catch(Exception e){
+             // it's already an Uri
+           }
            uris.add(uri);
          }
        }
